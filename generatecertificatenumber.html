@@ -1,0 +1,486 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Certificate Form</title>
+    <style>
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: #f7f7f7;
+            padding: 30px;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .form-container {
+            background-color: #fff;
+            padding: 40px;
+            border-radius: 8px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 500px;
+            margin-bottom: 40px;
+        }
+
+        h2 {
+            text-align: center;
+            font-size: 24px;
+            color: #333;
+            margin-bottom: 20px;
+        }
+
+        label {
+            font-size: 16px;
+            font-weight: 500;
+            color: #555;
+            margin-bottom: 8px;
+            display: block;
+            text-align: left;
+        }
+
+        input, button, select {
+            padding: 12px;
+            margin-bottom: 20px;
+            font-size: 16px;
+            width: 100%;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+            background-color: #f9f9f9;
+            box-sizing: border-box;
+        }
+
+        input[readonly] {
+            background-color: #e9ecef;
+            cursor: not-allowed;
+        }
+
+        button {
+            background-color: #4CAF50;
+            color: white;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            border: none;
+            padding: 12px;
+        }
+
+        button:hover {
+            background-color: #45a049;
+        }
+
+        .message {
+            font-size: 16px;
+            margin-top: 15px;
+            text-align: center;
+        }
+
+        .error {
+            color: #f44336;
+        }
+
+        .success {
+            color: #4CAF50;
+        }
+
+        .copy-btn {
+            background-color: #007BFF;
+            color: white;
+            border: 1px solid #007BFF;
+            cursor: pointer;
+            padding: 10px;
+            border-radius: 5px;
+            width: 100%;
+            margin-bottom: 20px;
+        }
+
+        .copy-btn:hover {
+            background-color: #0056b3;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 600px) {
+            .form-container, .table-container {
+                padding: 20px;
+                width: 90%;
+            }
+            h2 {
+                font-size: 20px;
+            }
+        }
+
+        /* Searchable Dropdown */
+        .search-container {
+            position: relative;
+        }
+
+        .dropdown-results {
+            position: absolute;
+            width: 100%;
+            background: white;
+            border: 1px solid #ccc;
+            max-height: 200px;
+            overflow-y: auto;
+            display: none;
+            z-index: 1000;
+        }
+
+        .dropdown-results div {
+            padding: 10px;
+            cursor: pointer;
+        }
+
+        .dropdown-results div:hover {
+            background: #f0f0f0;
+        }
+
+        /* Table styles */
+        .table-container {
+            background: #fff;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+            width: 100%;
+            max-width: 700px;
+            margin: 0 auto 40px auto;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+        th, td {
+            border: 1px solid #ccc;
+            padding: 8px;
+            text-align: left;
+        }
+        th {
+            background: #f0f0f0;
+        }
+        .delete-btn {
+            background-color: #d9534f;
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            margin-left: 10px;
+            transition: background-color 0.3s;
+        }
+        .delete-btn:hover {
+            background-color: #b52a1d;
+        }
+        .pagination {
+            text-align: center;
+            margin-top: 15px;
+        }
+        .pagination button {
+            background: #4CAF50;
+            color: #fff;
+            border: none;
+            padding: 6px 12px;
+            margin: 0 2px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        .pagination button.active,
+        .pagination button:disabled {
+            background: #388e3c;
+            cursor: default;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="form-container">
+        <h2>Student Certificate Information</h2>
+
+        <form id="certificateForm">
+            <label for="studentSearch">Search Student ID:</label>
+            <input type="text" id="studentSearch" placeholder="Type to search...">
+            <div class="dropdown-results" id="dropdownResults"></div>
+
+            <label for="certificateNumber">Certificate Number:</label>
+            <input type="text" id="certificateNumber" readonly>
+
+            <button type="button" class="copy-btn" id="copyButton">Copy Certificate Number</button>
+            <button type="button" id="generateBtn">Generate Certificate Number</button>
+            <button type="submit">Submit</button>
+        </form>
+
+        <p id="message" class="message"></p>
+    </div>
+
+    <div class="table-container">
+        <h2>All Generated Certificates</h2>
+        <table id="certificateTable">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Student ID</th>
+                    <th>Certificate Number</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody id="certificateTableBody">
+                <!-- Filled by JS -->
+            </tbody>
+        </table>
+        <div class="pagination" id="pagination"></div>
+    </div>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", async () => {
+            const studentSearchInput = document.getElementById("studentSearch");
+            const dropdownResults = document.getElementById("dropdownResults");
+            const certificateNumberInput = document.getElementById("certificateNumber");
+            const copyButton = document.getElementById("copyButton");
+            const generateBtn = document.getElementById("generateBtn");
+            const messageElement = document.getElementById("message");
+            const certificateTableBody = document.getElementById("certificateTableBody");
+            const paginationDiv = document.getElementById("pagination");
+
+            let studentIds = [];
+            let allCertificates = [];
+            let currentPage = 1;
+            const pageSize = 10;
+
+            // Fetch student IDs from the backend
+            async function fetchStudentIds() {
+                try {
+                    const response = await fetch('https://studentera.live/generatedstudentidofregisteredstudentatstudenterastudentid');
+                    const data = await response.json();
+                    studentIds = data.students || [];
+                } catch (error) {
+                    console.error("Error fetching student IDs:", error);
+                    studentIds = [];
+                }
+            }
+
+            // Fetch all certificates from the backend
+            async function fetchCertificates() {
+                try {
+                    const response = await fetch('https://studentera.live/progressreportuserofinternshipscompletedinternship');
+                    const data = await response.json();
+                    allCertificates = Array.isArray(data) ? data : [];
+                } catch (error) {
+                    allCertificates = [];
+                }
+            }
+
+            // Render certificate table with pagination
+            function renderCertificateTable(page = 1) {
+                certificateTableBody.innerHTML = "";
+                paginationDiv.innerHTML = "";
+                const total = allCertificates.length;
+                const totalPages = Math.ceil(total / pageSize);
+                const startIdx = (page - 1) * pageSize;
+                const endIdx = Math.min(startIdx + pageSize, total);
+
+                if (total === 0) {
+                    const row = document.createElement("tr");
+                    row.innerHTML = `<td colspan="4" style="text-align:center;">No certificates found</td>`;
+                    certificateTableBody.appendChild(row);
+                    return;
+                }
+
+                for (let i = startIdx; i < endIdx; i++) {
+                    const cert = allCertificates[i];
+                    const row = document.createElement("tr");
+                    row.innerHTML = `
+                        <td>${i + 1}</td>
+                        <td>${cert.studentId}</td>
+                        <td>${cert.certificateNumber}</td>
+                        <td>
+                            <button class="delete-btn" onclick="deleteCertificate('${cert.studentId}','${cert.certificateNumber}', this)">Delete</button>
+                        </td>
+                    `;
+                    certificateTableBody.appendChild(row);
+                }
+
+                // Pagination
+                if (totalPages > 1) {
+                    for (let i = 1; i <= totalPages; i++) {
+                        const btn = document.createElement("button");
+                        btn.textContent = i;
+                        if (i === page) {
+                            btn.classList.add("active");
+                            btn.disabled = true;
+                        }
+                        btn.addEventListener("click", function () {
+                            currentPage = i;
+                            renderCertificateTable(currentPage);
+                        });
+                        paginationDiv.appendChild(btn);
+                    }
+                }
+            }
+
+            // Load and render all certificates
+            async function loadCertificateTable(page = 1) {
+                await fetchCertificates();
+                renderCertificateTable(page);
+            }
+
+            // Function to filter student IDs based on input
+            studentSearchInput.addEventListener("input", function () {
+                const searchText = this.value.toLowerCase();
+                dropdownResults.innerHTML = "";
+                if (searchText === "") {
+                    dropdownResults.style.display = "none";
+                    return;
+                }
+
+                const filteredIds = studentIds.filter(id => id.toLowerCase().includes(searchText));
+
+                if (filteredIds.length === 0) {
+                    dropdownResults.innerHTML = "<div>No student found</div>";
+                } else {
+                    filteredIds.forEach(id => {
+                        const option = document.createElement("div");
+                        option.textContent = id;
+                        option.addEventListener("click", function () {
+                            studentSearchInput.value = id;
+                            dropdownResults.style.display = "none";
+                            certificateNumberInput.value = "";
+                        });
+                        dropdownResults.appendChild(option);
+                    });
+                }
+
+                dropdownResults.style.display = "block";
+            });
+
+            document.addEventListener("click", function (e) {
+                if (!studentSearchInput.contains(e.target) && !dropdownResults.contains(e.target)) {
+                    dropdownResults.style.display = "none";
+                }
+            });
+
+            // Function to check if a certificate is already generated
+            async function isCertificateAlreadyGenerated(studentId) {
+                await fetchCertificates();
+                return allCertificates.some(cert => cert.studentId === studentId);
+            }
+
+            // Generate a certificate number
+            async function generateCertificateNumber(studentId) {
+                messageElement.classList.remove('error', 'success');
+                messageElement.innerText = "";
+                if (!studentId) {
+                    messageElement.classList.add('error');
+                    messageElement.innerText = "Please select a Student ID before generating.";
+                    return;
+                }
+                const isGenerated = await isCertificateAlreadyGenerated(studentId);
+                if (isGenerated) {
+                    certificateNumberInput.value = "Certificate already generated!";
+                } else {
+                    certificateNumberInput.value = "SE" + Math.random().toString(36).substr(2, 8).toUpperCase();
+                }
+            }
+
+            // Generate button click handler
+            generateBtn.addEventListener("click", function () {
+                const studentId = studentSearchInput.value.trim();
+                generateCertificateNumber(studentId);
+            });
+
+            // Copy certificate number to clipboard
+            copyButton.addEventListener("click", function () {
+                if (certificateNumberInput.value && certificateNumberInput.value !== "Certificate already generated!") {
+                    navigator.clipboard.writeText(certificateNumberInput.value);
+                    alert("Certificate Number copied to clipboard!");
+                }
+            });
+
+            document.getElementById("certificateForm").addEventListener("submit", async function (event) {
+                event.preventDefault();
+
+                const studentId = studentSearchInput.value;
+                const certificateNumber = certificateNumberInput.value;
+
+                messageElement.classList.remove('error', 'success');
+                messageElement.innerText = "";
+
+                if (!studentId) {
+                    messageElement.classList.add('error');
+                    messageElement.innerText = "Please select a Student ID.";
+                    return;
+                }
+                if (!certificateNumber || certificateNumber === "Certificate already generated!") {
+                    messageElement.classList.add('error');
+                    messageElement.innerText = "Please generate a valid certificate number.";
+                    return;
+                }
+
+                try {
+                    const response = await fetch('https://studentera.live/save-certificate', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({ studentId, certificateNumber })
+                    });
+
+                    const data = await response.json();
+
+                    if (response.ok && data.success) {
+                        messageElement.classList.add('success');
+                        messageElement.innerText = `Certificate Number ${certificateNumber} for Student ID ${studentId} saved successfully!`;
+                        await loadCertificateTable(currentPage);
+                    } else {
+                        throw new Error(data.message || 'Failed to save certificate number');
+                    }
+                } catch (error) {
+                    messageElement.classList.add('error');
+                    messageElement.innerText = `Error: ${error.message}`;
+                }
+            });
+
+            // Delete certificate function
+            window.deleteCertificate = async function(studentId, certificateNumber, btn) {
+                if (!confirm(`Are you sure you want to delete certificate for Student ID: ${studentId}?`)) return;
+                messageElement.className = "";
+                messageElement.innerText = "Deleting certificate...";
+                btn.disabled = true;
+
+                try {
+                    const response = await fetch('https://studentera.live/delete-certificate', {
+                        method: 'DELETE',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ studentId, certificateNumber })
+                    });
+                    const data = await response.json();
+                    if (data.success) {
+                        messageElement.classList.remove('error');
+                        messageElement.classList.add('success');
+                        messageElement.innerText = data.message || "Certificate deleted successfully!";
+                        // If last item on last page deleted, go to previous page if needed
+                        const totalPages = Math.ceil((allCertificates.length - 1) / pageSize);
+                        if (currentPage > totalPages && totalPages > 0) currentPage = totalPages;
+                        await loadCertificateTable(currentPage);
+                    } else {
+                        messageElement.classList.remove('success');
+                        messageElement.classList.add('error');
+                        messageElement.innerText = data.message || "Failed to delete certificate.";
+                    }
+                } catch (error) {
+                    messageElement.classList.remove('success');
+                    messageElement.classList.add('error');
+                    messageElement.innerText = "An error occurred while deleting the certificate.";
+                }
+            };
+
+            // Initial load
+            await fetchStudentIds();
+            await loadCertificateTable(currentPage);
+        });
+    </script>
+
+</body>
+</html>

@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Assign Internship Domain</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f9;
+        }
+        .form-container {
+            max-width: 450px;
+            margin: 40px auto 20px auto;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            background-color: #fff;
+            box-shadow: 0px 8px 20px rgba(0, 0, 0, 0.1);
+            animation: fadeIn 0.5s ease-in;
+            position: relative;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        h2 {
+            text-align: center;
+            margin-bottom: 20px;
+            font-size: 24px;
+            color: #333;
+        }
+        label {
+            font-size: 14px;
+            color: #555;
+            font-weight: bold;
+            margin-bottom: 8px;
+            display: block;
+        }
+        input, select {
+            width: 100%;
+            padding: 12px;
+            margin-bottom: 10px;
+            border-radius: 6px;
+            border: 1px solid #ddd;
+            font-size: 16px;
+            transition: border-color 0.3s ease;
+            box-sizing: border-box;
+        }
+        input:focus, select:focus {
+            border-color: #4CAF50;
+            box-shadow: 0 0 5px rgba(76, 175, 80, 0.5);
+            outline: none;
+        }
+        .dropdown-container {
+            position: relative;
+        }
+        .dropdown-results {
+            position: absolute;
+            width: 100%;
+            background: white;
+            border: 1px solid #ccc;
+            max-height: 150px;
+            overflow-y: auto;
+            display: none;
+            z-index: 1000;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+        .dropdown-results div {
+            padding: 10px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        .dropdown-results div:hover {
+            background: #f0f0f0;
+        }
+        button {
+            width: 100%;
+            padding: 12px;
+            background-color: #4CAF50;
+            color: white;
+            font-size: 16px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        .loading {
+            display: none;
+            text-align: center;
+            font-size: 16px;
+            color: #333;
+            margin-bottom: 10px;
+        }
+        .error, .success {
+            display: none;
+            padding: 10px;
+            border-radius: 6px;
+            font-size: 14px;
+            margin-bottom: 10px;
+        }
+        .error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        .success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .table-container {
+            background: #fff;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+            width: 100%;
+            max-width: 700px;
+            margin: 0 auto 40px auto;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+        th, td {
+            border: 1px solid #ccc;
+            padding: 8px;
+            text-align: left;
+        }
+        th {
+            background: #f0f0f0;
+        }
+        .delete-btn {
+            background-color: #d9534f;
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            margin-left: 10px;
+            transition: background-color 0.3s;
+        }
+        .delete-btn:hover {
+            background-color: #b52a1d;
+        }
+        .pagination {
+            text-align: center;
+            margin-top: 15px;
+        }
+        .pagination button {
+            background: #4CAF50;
+            color: #fff;
+            border: none;
+            padding: 6px 12px;
+            margin: 0 2px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        .pagination button.active,
+        .pagination button:disabled {
+            background: #388e3c;
+            cursor: default;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="form-container">
+        <h2>Assign Internship Domain</h2>
+        <form id="studentForm" novalidate>
+            <label for="studentSearch">Student ID</label>
+            <div class="dropdown-container">
+                <input type="text" id="studentSearch" name="studentId" placeholder="Type to search...">
+                <div class="dropdown-results" id="dropdownResults"></div>
+            </div>
+            <label for="course">Select Course</label>
+            <select id="course" name="course" required>
+                <option value="" disabled selected>Select a course</option>
+                <option value="Web Development">Web Development</option>
+                <option value="Android Development">Android Development</option>
+                <option value="Java Development">Java Development</option>
+                <option value="Python Development">Python Development</option>
+                <option value="Graphics Design">Graphics Design</option>
+                <option value="Data Analysts">Data Analysts</option>
+            </select>
+            <button type="submit">Submit</button>
+            <div class="loading">Submitting...</div>
+            <div class="error"></div>
+            <div class="success"></div>
+        </form>
+    </div>
+
+    <div class="table-container">
+        <h2>Assigned Internship Domains</h2>
+        <table id="assignedTable">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Student ID</th>
+                    <th>Course</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody id="assignedTableBody">
+                <!-- Filled by JS -->
+            </tbody>
+        </table>
+        <div class="pagination" id="pagination"></div>
+    </div>
+
+    <script>
+        let studentIds = [];
+        let allAssignments = [];
+        let currentPage = 1;
+        const pageSize = 10;
+
+        // Fetch student IDs for dropdown
+        async function fetchStudentIds() {
+            try {
+                const response = await fetch('https://studentera.live/generatedstudentidofregisteredstudentatstudenterastudentid');
+                const data = await response.json();
+                studentIds = data.students || [];
+            } catch (error) {
+                studentIds = [];
+            }
+        }
+
+        // Fetch all assignments (studentId + course)
+        async function fetchAssignments() {
+            try {
+                const response = await fetch('https://studentera.live/userselffetchtheirprojectsofapplieddomainuserprojects.json');
+                const data = await response.json();
+                // Flatten the assignments for table display
+                allAssignments = [];
+                if (Array.isArray(data)) {
+                    data.forEach(domain => {
+                        if (Array.isArray(domain.studentIds)) {
+                            domain.studentIds.forEach(studentId => {
+                                allAssignments.push({ studentId, course: domain.internshipDomain });
+                            });
+                        }
+                    });
+                }
+            } catch (error) {
+                allAssignments = [];
+            }
+        }
+
+        // Render assignments table with pagination
+        function renderAssignmentsTable(page = 1) {
+            const tableBody = document.getElementById("assignedTableBody");
+            const paginationDiv = document.getElementById("pagination");
+            tableBody.innerHTML = "";
+            paginationDiv.innerHTML = "";
+            const total = allAssignments.length;
+            const totalPages = Math.ceil(total / pageSize);
+            const startIdx = (page - 1) * pageSize;
+            const endIdx = Math.min(startIdx + pageSize, total);
+
+            if (total === 0) {
+                const row = document.createElement("tr");
+                row.innerHTML = `<td colspan="4" style="text-align:center;">No assignments found</td>`;
+                tableBody.appendChild(row);
+                return;
+            }
+
+            for (let i = startIdx; i < endIdx; i++) {
+                const assign = allAssignments[i];
+                const row = document.createElement("tr");
+                row.innerHTML = `
+                    <td>${i + 1}</td>
+                    <td>${assign.studentId}</td>
+                    <td>${assign.course}</td>
+                    <td>
+                        <button class="delete-btn" onclick="deleteAssignment('${assign.studentId}','${assign.course}', this)">Delete</button>
+                    </td>
+                `;
+                tableBody.appendChild(row);
+            }
+
+            // Pagination
+            if (totalPages > 1) {
+                for (let i = 1; i <= totalPages; i++) {
+                    const btn = document.createElement("button");
+                    btn.textContent = i;
+                    if (i === page) {
+                        btn.classList.add("active");
+                        btn.disabled = true;
+                    }
+                    btn.addEventListener("click", function () {
+                        currentPage = i;
+                        renderAssignmentsTable(currentPage);
+                    });
+                    paginationDiv.appendChild(btn);
+                }
+            }
+        }
+
+        // Load and render all assignments
+        async function loadAssignmentsTable(page = 1) {
+            await fetchAssignments();
+            renderAssignmentsTable(page);
+        }
+
+        // Student ID dropdown search
+        document.addEventListener("DOMContentLoaded", async () => {
+            await fetchStudentIds();
+            await loadAssignmentsTable(currentPage);
+
+            const studentSearchInput = document.getElementById("studentSearch");
+            const dropdownResults = document.getElementById("dropdownResults");
+
+            studentSearchInput.addEventListener("input", function () {
+                const searchText = this.value.toLowerCase();
+                dropdownResults.innerHTML = "";
+                if (searchText === "") {
+                    dropdownResults.style.display = "none";
+                    return;
+                }
+                const filteredIds = studentIds.filter(id => id.toLowerCase().includes(searchText));
+                if (filteredIds.length === 0) {
+                    dropdownResults.innerHTML = "<div>No student found</div>";
+                } else {
+                    filteredIds.forEach(id => {
+                        const option = document.createElement("div");
+                        option.textContent = id;
+                        option.addEventListener("click", function () {
+                            studentSearchInput.value = id;
+                            dropdownResults.style.display = "none";
+                        });
+                        dropdownResults.appendChild(option);
+                    });
+                }
+                dropdownResults.style.display = "block";
+            });
+
+            document.addEventListener("click", function (e) {
+                if (!studentSearchInput.contains(e.target) && !dropdownResults.contains(e.target)) {
+                    dropdownResults.style.display = "none";
+                }
+            });
+
+            document.getElementById('studentForm').addEventListener('submit', async function (e) {
+                e.preventDefault();
+
+                const studentId = studentSearchInput.value.trim();
+                const selectedCourse = document.getElementById('course').value;
+                const messageElement = document.querySelector('.success');
+                const errorElement = document.querySelector('.error');
+
+                errorElement.style.display = "none";
+                messageElement.style.display = "none";
+
+                if (!studentId) {
+                    errorElement.textContent = "Please select a Student ID.";
+                    errorElement.style.display = "block";
+                    return;
+                }
+
+                document.querySelector('.loading').style.display = 'block';
+
+                try {
+                    const response = await fetch('https://studentera.live/addStudent', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ studentId, course: selectedCourse })
+                    });
+
+                    const data = await response.json();
+                    document.querySelector('.loading').style.display = 'none';
+
+                    if (data.success) {
+                        messageElement.textContent = data.message;
+                        messageElement.style.display = "block";
+                        errorElement.style.display = "none";
+                        await loadAssignmentsTable(currentPage);
+                    } else {
+                        errorElement.textContent = data.message || "Error adding student.";
+                        errorElement.style.display = "block";
+                        messageElement.style.display = "none";
+                    }
+                } catch (error) {
+                    document.querySelector('.loading').style.display = 'none';
+                    errorElement.textContent = "Server error.";
+                    errorElement.style.display = "block";
+                    messageElement.style.display = "none";
+                }
+            });
+        });
+
+        // Delete assignment function
+        async function deleteAssignment(studentId, course, btn) {
+            if (!confirm(`Are you sure you want to delete assignment for Student ID: ${studentId} and Course: ${course}?`)) return;
+            const errorElement = document.querySelector('.error');
+            const messageElement = document.querySelector('.success');
+            errorElement.style.display = "none";
+            messageElement.style.display = "none";
+            btn.disabled = true;
+
+            try {
+                const response = await fetch('https://studentera.live/delete-assignment', {
+                    method: 'DELETE',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ studentId, course })
+                });
+                const data = await response.json();
+                if (data.success) {
+                    messageElement.textContent = data.message || "Assignment deleted successfully!";
+                    messageElement.style.display = "block";
+                    await loadAssignmentsTable(currentPage);
+                } else {
+                    errorElement.textContent = data.message || "Failed to delete assignment.";
+                    errorElement.style.display = "block";
+                }
+            } catch (error) {
+                errorElement.textContent = "An error occurred while deleting the assignment.";
+                errorElement.style.display = "block";
+            }
+        }
+        window.deleteAssignment = deleteAssignment;
+    </script>
+
+</body>
+</html>
